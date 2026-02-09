@@ -1,0 +1,206 @@
+---
+title: "Praktikum 2 Anreg"
+author: "Abdullah' Ammar Rabbaniyyin"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: flatly
+    toc: true
+    toc_float: true
+    number_sections: false
+mainfont: "Times New Roman"
+---
+<style>
+body {
+  font-family: "Times New Roman", serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Times New Roman", serif;
+  color: #b30000; /* merah elegan */
+  font-weight: bold;
+}
+
+h1 {
+  border-bottom: 2px solid #b30000;
+  padding-bottom: 5px;
+}
+</style>
+
+# Data
+
+## Membaca Data
+
+```{r}
+library(readxl)
+
+data <- read_excel("D:\\My Documents\\Downloads\\NSC-2025.xlsx", sheet="Sheet2")
+head(data) 
+```
+
+## Menyesuaikan Peubah
+
+```{r}
+colnames(data) <- c("Kabupaten/Kota", "Y", paste0("X", 1:9))
+head(data)
+```
+
+# Eksplorasi Data
+
+```{r}
+n <- nrow(data)
+```
+
+Saat ini terdapat 1 peubah Y dan 9 peubah X, misal ingin dilakukan eksplorasi dan analisis terkait peubah X6
+
+```{r}
+plot(data$X6, data$Y,
+     main = "Pertumbuhan Ekonomi Sektor Industri Pengolahan vs Indeks Pembangunan Manusia",
+     xlab = "PESIP",
+     ylab = "IPM")
+```
+
+```{r}
+summary(data$Y)
+```
+
+```{r}
+boxplot(data$Y)
+```
+
+```{r}
+summary(data$X6)
+```
+
+```{r}
+boxplot(data$X6)
+```
+
+# Pembentukan Model
+
+## Manual
+
+### Koefisien Regresi
+
+$\hat{y_i} = \hat{\beta_0} + \hat{\beta_1} x_{i}, i = 1,2, ..., n$
+$\hat{\beta}_1 = \frac{\sum (x_i - \bar{x})(y_i - \bar{y})} {\sum (x_i - \bar{x})^2} = \frac{S_{xy}}{S_{xx}}$
+$\hat{\beta_1} = \frac{\sum (x_iy)-\frac{\sum(x_i)\sum(y)}{n}}{\sum(x_i^2)-\frac{\sum(x_i^2)}{n}}$
+$\hat{\beta_0} = \bar{y} - \hat{\beta_1} \bar{x}$
+
+
+```{r}
+x <- data$X6
+y <- data$Y
+```
+
+```{r}
+b1 <- (sum(x*y)-sum(x)*sum(y)/n)/(sum(x^2)-(sum(x)^2/n))
+b0 <- mean(y)-b1*mean(x)
+
+cat("Koefisien b0:", b0, "\n")  
+cat("Koefisien b1:", b1, "\n")
+```
+
+### Standar Error Parameter Regresi
+
+Standar error menunjukan seberapa besar ketidakpastian dalam estimasi koefisien
+
+```{r}
+galat <- y-(b0+b1*x)
+ragam_galat <- sum(galat^2)/(n-2)
+
+se_b0 <- sqrt(ragam_galat*(1/n+mean(x)^2/sum((x-mean(x))^2)))
+se_b1 <- sqrt(ragam_galat/sum((x-mean(x))^2))
+
+cat("Standar error b0:", se_b0, "\n") 
+cat("Standar error b1:", se_b1, "\n")
+```
+
+### Signifikansi Parameter (nilai-t)
+
+Nilai ini menunjukkan tingkat signifikansi secara parsial dari setiap koefisien peubah berdasarkan nilai t dan probabilitas nilai p
+
+```{r}
+t_b0 <- b0/se_b0
+t_b1 <- b1/se_b1
+p_b0 <- 2*pt(-abs(t_b0 ),df<-n-2)
+p_b1 <- 2*pt(-abs(t_b1 ),df<-n-2)
+
+cat("Nilai t pada b0 adalah", t_b0, "dengan nilai p sebesar", p_b0, "\n")  
+```
+
+```{r}
+cat("Nilai t pada b1 adalah", t_b1, "dengan nilai p sebesar", p_b1, "\n") 
+```
+
+Nilai p kurang dari alpha 0.05 untuk b0 maupun b1 sehingga signifikan pada taraf nyata 5%
+
+### Koefisien Determinasi dan Penyesuaiannya
+
+Pada analisis regresi linier sederhana, koefisien determinasi yang digunakan adalah multiple R Squared, sedangkan regresi linier berganda menggunakan adjusted R Squared yang disesuaikan dengan banyaknya peubah
+
+```{r}
+r <- (sum(x*y)-sum(x)*sum(y)/n)/
+sqrt((sum(x^2)-(sum(x)^2/n))*(sum(y^2)-(sum(y)^2/n)))
+Koef_det <- r^2
+Koef_det
+```
+
+```{r}
+Adj_R2 <- 1-((1-Koef_det)*(n-1)/(n-1-1))
+Adj_R2
+```
+
+### Signifikansi Simultan (F)
+
+Nilai ini menunjukkan signifikansi dan kebaikan model secara simultan (bersamaan seluruh peubah) yang menjelaskan model secara keseluruhan memiliki hubungan berarti antara X dan Y
+
+```{r}
+galat<-y-(b0+b1*x)
+
+JKG <- sum((y - (b0+b1*x))^2)
+JKReg <- sum(((b0+b1*x)- mean(y))^2)
+JKT <- sum((y - mean(y))^2)
+JKT <- JKReg+JKG
+
+dbReg <- 1
+dbg <- n-2
+dbt <- n-1
+
+(Fhit <- (JKReg/dbReg)/(JKG/dbg))
+```
+
+
+```{r}
+(p_Fhit <- 1-pf(Fhit, dbReg, dbg, lower.tail = F))
+```
+
+Nilai p kurang dari alpha 0.05 sehingga secara simultan X6 dan Y saling memengaruhi
+
+
+## Menggunakan Fungsi `lm()`
+
+```{r}
+model <- lm(Y~X6, data = data)
+summary(model)
+```
+
+Berdasarkan hasil diperoleh bahwa kedua cara valid dan memberikan hasil yang sama dalam membuat pemodelan regresi linear sederhana.
+
+```{r}
+anova(model)
+```
+
+# Kesimpulan
+
+Model yang terbentuk adalah sebagai berikut:
+
+$$\hat{Y} = 79.71166  -0.8221789 X_1$$
+
+dengan Y adalah nilai Indeks Pembangunan Manusia dan X6 adalah Pertumbuhan Ekonomi Sektor Industri Pengolahan.
+
+Didapatkan nilai $\hat\beta_1 = 79.71166$ artinya nilai dugaan rataan indeks pembangunan manusia ketika Pertumbuhan Ekonomi Sektor Industri Pengolahan bernilai 0 adalah 79.7116, akan tetapi nilai 0 tidak ada dalam selang pengamatan Pertumbuhan Ekonomi Sektor Industri Pengolahan sehingga $\hat\beta_0$ tidak dapat didefinisikan lebih lanjut
+
+Nilai $\hat\beta_0 = -0.8221789$ artinya nilai dugaan perubahan dugaan rataan Indeks Pembangunan Manusia jika Pertumbuhan Ekonomi Sektor Industri Pengolahan berubah satu satuan adalah sebesar 82,2%
+
+Koefisien determinasi yang dihasilkan adalah 0.1268565 atau 12,69% artinya keragaman Indeks Pembangunan Manusia yang dapat dijelaskan oleh nilai pertumbuhan ekonomi sektor industri pengolahan adalah sebesar 12,69%, sisanya yaitu 87,31% dijelaskan oleh peubah lain yang tidak dimasukkan dalam model.
