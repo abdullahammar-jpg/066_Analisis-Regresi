@@ -1,6 +1,6 @@
 # 📈 Praktikum Analisis Regresi
 
-Repositori ini merupakan catatan praktikum dalam memahami dan mengimplementasikan **Analisis Regresi**. Fokus utama dari proyek ini adalah memahami hubungan antar variabel, membangun model prediktif, dan melakukan evaluasi model menggunakan dataset dunia nyata.
+Repositori ini merupakan catatan praktikum dalam memahami dan mengimplementasikan **Analisis Regresi**. Fokus utama saya adalah memahami hubungan antar variabel, membangun model prediktif, dan melakukan evaluasi model menggunakan dataset dunia nyata.
 
 ---
 
