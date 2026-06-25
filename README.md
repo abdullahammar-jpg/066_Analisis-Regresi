@@ -55,6 +55,6 @@ Ketika hasil uji asumsi klasik menunjukkan adanya pelanggaran, beberapa metode b
 - **WLS (Weighted Least Squares)** — digunakan untuk menangani **heteroskedastisitas**. Berbeda dari OLS yang memberi bobot sama pada setiap observasi, WLS memberi bobot lebih kecil pada observasi dengan varians error yang besar, sehingga estimasi menjadi lebih efisien.
 - **Transformasi Box-Cox** — transformasi pangkat pada variabel dependen untuk mengatasi pelanggaran normalitas dan/atau heteroskedastisitas, dengan mencari nilai $\lambda$ (lambda) optimal yang membuat distribusi data mendekati normal.
 - **Transformasi umum lainnya** — beberapa transformasi sederhana yang sering digunakan sebelum atau sebagai alternatif Box-Cox:
-  - **Logaritma ($\ln(y)$ atau $\log_{10}(y)$)** — cocok untuk data dengan sebaran yang skewed (menjulur) atau bersifat eksponensial.
+  - **Logaritma ($\ln(y)$ atau $\log_{10}(y)$ )** — cocok untuk data dengan sebaran yang skewed (menjulur) atau bersifat eksponensial.
   - **Akar kuadrat ($\sqrt{y}$)** — sering digunakan untuk data *count* (cacahan).
   - **Inverse ($1/y$)** — digunakan saat varians error meningkat tajam terhadap nilai prediksi.
