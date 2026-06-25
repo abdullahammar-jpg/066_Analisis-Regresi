@@ -1,0 +1,233 @@
+---
+title: "Perkenalan R"
+author: "Abdullah' Ammar Rabbaniyyin"
+date: "2026-01-27"
+output: rmdformats::readthedown
+---
+
+# Panduan Materi Pengantar Analisis Regresi dengan R Studio
+
+### Pertemuan 1: Pengenalan Analisis Regresi dan R Studio
+
+__________________________________________________________________________________
+## **1. Pengenalan R**
+R adalah bahasa pemrograman dan lingkungan komputasi untuk analisis data (manipulasi data), statistik (perhitungan), dan visualisasi. R tergolong bahasa pemrograman open source dengan analisis statistikanya berupa serangkaian steps yang hasilnya disimpan dalam suatu objek.
+
+__________________________________________________________________________________
+## **2. Tipe Data di R**
+R memiliki berbagai tipe data:
+
+### a. **Vector**
+Vector adalah tipe paling sederhana dari tipe data berupa kumpulan elemen dengan tipe yang sama.
+```{r}
+angka <- c(1, 2, 3, 4)
+angka
+
+teks <- c("A", "B", "C", "D")
+teks
+
+(logik <- c(TRUE, FALSE, TRUE))
+```
+
+```{r}
+#bisa gunakan perintah tertentu
+#rep(pengulangan)
+rep(angka,2)
+rep(angka,each=2)
+
+#seq(membuat suatu urutan)
+seq(from=3, to=1)
+seq(from=1, to=2, by=0.5)
+```
+
+```{r}
+#dapat mengambil bagian tertentu
+teks[2:3]
+teks[c(1, 2)]
+angka[angka<3]
+teks[-3]
+```
+
+### b. **Matrix**
+Matrix adalah kumpulan data dua dimensi dengan elemen bertipe sama, dapat dibuat dari vector
+```{r}
+mat <- matrix(1:6, nrow = 2)
+mat
+data <- matrix(c(1,2,1, 100,102,103), nrow = 2, ncol = 3, byrow = TRUE)
+data
+
+dim(mat) #ukuran matriks
+rbind(mat,data) #menggabungkan matriks terhadap baris
+cbind(mat,data) #menggabungkan matriks terhadap kolom
+```
+
+```{r}
+#dapat mengambil bagian tertentu
+data[1,3]
+data[,2]
+data[-1,-2]
+```
+
+### c. **Factor**
+Factor adalah bentuk khusus dari vector dengan elemen kategorik dan memiliki level
+```{r}
+dt<-c("a","b","a","a","a","b")
+as.factor(dt)
+```
+
+```{r}
+jk <- factor(c("L", "P", "P", "L"))
+levels(jk)
+```
+
+### d. **List**
+List adalah kumpulan elemen yang bisa bertipe berbeda.
+```{r}
+list(angka, teks = teks, data)
+```
+
+### e. **Data Frame**
+Data Frame adalah kumpulan data dua dimensi dengan elemen bertipe campuran yang merupakan bentuk khusus dari list untuk menyimpan data berbagai tipe dalam bentuk matriks
+```{r}
+data.frame(Nama = c("Andi", "Budi"), Umur = c(25, 30))
+data.frame(Mahasiswa=c("Amir","Budi", "Citra"), JK=c("L","L","P") )
+```
+
+__________________________________________________________________________________
+## **3. Membaca Data ke R**
+R dapat membaca berbagai format file:
+
+### a. **Excel**
+Gunakan paket `readxl`.
+```{r}
+#install.packages("readxl")
+library(readxl)
+
+# Membaca file Excel
+data_excel <- read_excel("D:\\My Documents\\Downloads\\Data-excel-pertemuan-1.xlsx")
+```
+
+```{r}
+data_excel
+```
+
+### b. **CSV**
+```{r}
+# Membaca file CSV
+data_csv <- read.csv("D:\\My Documents\\Downloads\\Data csv pertemuan 1.csv", sep = ";")
+dataaa <- read.csv2("D:\\My Documents\\Downloads\\Data csv pertemuan 1.csv")
+```
+
+```{r}
+data_csv
+```
+
+```{r}
+dataaa
+```
+
+__________________________________________________________________________________
+## **4. Manipulasi Data Frame**
+### a. **Mengambil Peubah dari Data Frame**
+Gunakan tanda `$` atau indeks.
+```{r}
+# Mengambil kolom Nama
+#data_excel$Nama
+
+# Mengambil kolom kedua
+dataaa[,3:4]
+```
+
+### b. **Menggabungkan Peubah**
+Gunakan fungsi `cbind()` untuk kolom atau `rbind()` untuk baris.
+```{r}
+# Menggabungkan dua kolom
+kolom_baru <- c(100, 85)
+data_baru <- cbind(data_excel, Skor = kolom_baru)
+data_baru
+```
+
+__________________________________________________________________________________
+## **5. Menyimpan Data dari R**
+R dapat menyimpan data dalam berbagai format:
+
+### a. **Excel**
+Gunakan paket `writexl`.
+```{r}
+# Install dan load paket
+#install.packages("writexl")
+library(writexl)
+
+# Menyimpan data ke file Excel
+write_xlsx(data_baru, "data.xlsx")
+```
+
+### b. **CSV**
+```{r}
+# Menyimpan data ke file CSV
+write.csv(data_excel, "data.csv", row.names = FALSE)
+```
+
+__________________________________________________________________________________
+## **6. Paket untuk Analisis Regresi**
+Beberapa paket populer:
+- **`stats`**: Paket bawaan R untuk regresi linear.
+- **`car`**: Menyediakan tools untuk diagnosa model.
+- **`lmtest`**: Untuk uji asumsi regresi.
+
+__________________________________________________________________________________
+## **7. Menghitung Korelasi**
+### Syntax Dasar
+Gunakan fungsi `cor()`.
+```{r}
+# Menghitung korelasi antara dua variabel
+harga <- c(245, 312, 279, 308, 199, 219, 405, 324, 319, 255)
+luas <- c(1400, 1600, 1700, 1875, 1100, 1550, 2350, 2450, 1425, 1700)
+data_rumah <- data.frame(harga, luas)
+
+cor(luas, harga)
+(korelasi <- cor(data_rumah))
+library(corrplot)
+corrplot(corr = korelasi, method = "number", type =
+"upper")
+```
+
+```{r}
+#uji signifikansi koefisien korelasi
+cor.test(x = luas, y = harga, alternative = "two.sided", method = "pearson", exact = NULL, conf.level = 0.95)
+```
+
+### Contoh dengan Dataset Built-in
+```{r}
+# Korelasi antara mpg dan hp di dataset mtcars
+cor(mtcars$mpg, mtcars$hp)
+```
+
+__________________________________________________________________________________
+## **8. Membuat Scatter Plot**
+Gunakan fungsi `plot()` untuk membuat scatter plot.
+```{r}
+# Membuat scatter plot
+plot (x = luas, y = harga,
+      main = "Scatterplot Harga vs Luas Lantai",
+      xlab = "Luas Lantai (m^2)",
+      ylab = "Harga Rumah (Rp.Juta)"
+      )
+
+plot(mtcars$mpg, mtcars$hp,
+     main = "Scatter Plot",
+     xlab = "MPG", ylab = "HP", col = "blue")
+```
+
+### Menambahkan Garis Tren
+Gunakan fungsi `abline()`.
+```{r}
+plot(data_rumah$luas, data_rumah$harga,
+     main = "Scatter Plot dengan Garis Regresi",
+     xlab = "Luas Rumah",
+     ylab = "Harga Rumah")
+
+model <- lm(harga ~ luas, data = data_rumah)
+
+abline(model, col = "red", lwd = 2)
+```
